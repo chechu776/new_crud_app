@@ -45,7 +45,6 @@ const adm = async (req, res) => {
 
 const add = async (req, res) => {
     try {
-        console.log(req.body);
         const user = new userModel({
             name: req.body.name,
             phone: req.body.phone,
@@ -105,6 +104,7 @@ const del = async (req, res) => {
             type: "success",
             message:"User deleted successfully"
         }
+        res.status(200).json({ message:"user deleted succesfully", success:true })
     }
     catch(err){
         res.json({ message: err.message, type: "danger" })
