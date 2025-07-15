@@ -1,3 +1,4 @@
+import { response } from "express";
 import userModel from "../models/users.js";
 
 const log = async (req, res) => {
@@ -28,20 +29,25 @@ const login = async (req, res) => {
     }
     catch (err) {
         console.log(err);
-
         res.status(404).send(err)
     }
 }
 
 const adm = async (req, res) => {
-    try {
-        const users = await userModel.find();
-        res.render("admin-dashboard", { title: "Home page", users: users })
+    if (req.session.user) {
+        try {
+            const users = await userModel.find();
+            res.render("admin-dashboard", { title: "Home page", users: users })
+        }
+        catch (err) {
+            res.json({ message: err.message });
+        }
     }
-    catch (err) {
-        res.json({ message: err.message });
+    else {
+        res.render("partials/error.ejs",{title:"error"})
     }
 }
+
 
 const add = async (req, res) => {
     try {
@@ -67,13 +73,14 @@ const ad = async (req, res) => {
 }
 
 const edit = async (req, res) => {
-    try {
-        const user = await userModel.findById(req.params.id);
-        res.render("edit_user", { title: "Edit user", user: user })
-    }
-    catch (err) {
-        res.status(500).send("user not found")
-    }
+    
+        try {
+            const user = await userModel.findById(req.params.id);
+            res.render("edit_user", { title: "Edit user", user: user })
+        }
+        catch (err) {
+            res.status(500).send("user not found")
+        }
 }
 
 const update = async (req, res) => {
@@ -102,13 +109,23 @@ const del = async (req, res) => {
         await userModel.findByIdAndDelete(id)
         req.session.message = {
             type: "success",
-            message:"User deleted successfully"
+            message: "User deleted successfully"
         }
-        res.status(200).json({ message:"user deleted succesfully", success:true })
+        res.status(200).json({ message: "user deleted succesfully", success: true })
     }
-    catch(err){
+    catch (err) {
         res.json({ message: err.message, type: "danger" })
     }
 }
 
-export { login, log, adm, add, ad, edit, update, del }
+const logout = (req, res) => {
+        req.session.destroy((err) => {
+            if (err) {
+                return res.status(500).json({ success: false});
+            }
+            res.json({ success: true });
+        });
+};
+
+
+export { login, log, adm, add, ad, edit, update, del, logout }

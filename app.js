@@ -27,3 +27,7 @@ mongoose.connect(Dburl).then(() => {
     console.log("db connected");
     app.listen(4000)
 })
+
+app.use("/",(req,res)=>{
+    res.redirect("/login")
+})
