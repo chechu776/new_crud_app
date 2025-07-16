@@ -34,7 +34,6 @@ const login = async (req, res) => {
 }
 
 const adm = async (req, res) => {
-    if (req.session.user) {
         try {
             const users = await userModel.find();
             res.render("admin-dashboard", { title: "Home page", users: users })
@@ -43,10 +42,6 @@ const adm = async (req, res) => {
             res.json({ message: err.message });
         }
     }
-    else {
-        res.render("partials/error.ejs",{title:"error"})
-    }
-}
 
 
 const add = async (req, res) => {
