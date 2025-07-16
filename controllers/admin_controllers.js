@@ -1,5 +1,6 @@
 import { response } from "express";
 import userModel from "../models/users.js";
+import bcrypt from "bcrypt"
 
 const log = async (req, res) => {
     try {
@@ -21,8 +22,9 @@ const login = async (req, res) => {
         if (!user.role) {
             return res.status(404).send("Access Denied: Not an Admin")
         }
-        if (user.password != password) {
-            return res.status(404).send("Incorrect password")
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) {
+            return res.status(401).send("Incorrect password");
         }
         req.session.user = user;
         res.redirect("/admin-dashboard")
@@ -34,25 +36,28 @@ const login = async (req, res) => {
 }
 
 const adm = async (req, res) => {
-        try {
-            const users = await userModel.find();
-            res.render("admin-dashboard", { title: "Home page", users: users })
-        }
-        catch (err) {
-            res.json({ message: err.message });
-        }
+    try {
+        const users = await userModel.find();
+        res.render("admin-dashboard", { title: "Home page", users: users })
     }
+    catch (err) {
+        res.json({ message: err.message });
+    }
+}
 
 
 const add = async (req, res) => {
     try {
-        const user = new userModel({
-            name: req.body.name,
-            phone: req.body.phone,
-            email: req.body.email,
-            password: req.body.password,
-        });
+        const {name,phone,email,password}=req.body;
+        const salt = 10
+        const hashedPassword=await bcrypt.hash(password, salt)
         await user.save()
+        const user = new userModel({
+            name,
+            phone,
+            email,
+            password: hashedPassword,
+        });
         req.session.message = {
             type: "success",
             message: "user added succesfully"
@@ -63,19 +68,20 @@ const add = async (req, res) => {
         res.json({ message: err.message, type: "danger" })
     }
 }
+
 const ad = async (req, res) => {
     res.render("add_user", { title: "Add user" })
 }
 
 const edit = async (req, res) => {
-    
-        try {
-            const user = await userModel.findById(req.params.id);
-            res.render("edit_user", { title: "Edit user", user: user })
-        }
-        catch (err) {
-            res.status(500).send("user not found")
-        }
+
+    try {
+        const user = await userModel.findById(req.params.id);
+        res.render("edit_user", { title: "Edit user", user: user })
+    }
+    catch (err) {
+        res.status(500).send("user not found")
+    }
 }
 
 const update = async (req, res) => {
@@ -114,12 +120,12 @@ const del = async (req, res) => {
 }
 
 const logout = (req, res) => {
-        req.session.destroy((err) => {
-            if (err) {
-                return res.status(500).json({ success: false});
-            }
-            res.json({ success: true });
-        });
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).json({ success: false });
+        }
+        res.json({ success: true });
+    });
 };
 
 
