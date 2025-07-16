@@ -1,5 +1,5 @@
 import express from "express"
-import { login, log, adm, add, ad, edit, update, del, logout } from "../controllers/admin_controllers.js";
+import { login, log, adm, add, ad, edit, update, del, logout,addproduct,showproduct,addprod,editproduct,updateproduct,delproduct } from "../controllers/admin_controllers.js";
 const router = express.Router();
 
 router.get("/login", log)
@@ -19,5 +19,11 @@ router.get("/edit/:id", edit)
 router.post("/update/:id", update)
 router.delete("/delete/:id", del)
 router.get("/logout", logout)
+router.get("/addprod",addprod)
+router.post("/addproducts",addproduct)
+router.get("/showproducts",showproduct)
+router.get("/editproduct/:id", editproduct)
+router.post("/updateproduct/:id", updateproduct)
+router.delete("/deleteproduct/:id", delproduct)
 
 export default router;

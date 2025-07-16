@@ -1,5 +1,6 @@
 import { response } from "express";
 import userModel from "../models/users.js";
+import productModel from "../models/products.js";
 import bcrypt from "bcrypt"
 
 const log = async (req, res) => {
@@ -51,13 +52,14 @@ const add = async (req, res) => {
         const {name,phone,email,password}=req.body;
         const salt = 10
         const hashedPassword=await bcrypt.hash(password, salt)
-        await user.save()
+        
         const user = new userModel({
             name,
             phone,
             email,
             password: hashedPassword,
         });
+        await user.save()
         req.session.message = {
             type: "success",
             message: "user added succesfully"
@@ -74,7 +76,6 @@ const ad = async (req, res) => {
 }
 
 const edit = async (req, res) => {
-
     try {
         const user = await userModel.findById(req.params.id);
         res.render("edit_user", { title: "Edit user", user: user })
@@ -128,5 +129,91 @@ const logout = (req, res) => {
     });
 };
 
+const addprod = async(req,res)=>{
+    try {
+        const products = await productModel.find();
+        res.render("add_products", { title: "Add Products", products: products })
+    }
+    catch (err) {
+        res.json({ message: err.message });
+    }
+}
 
-export { login, log, adm, add, ad, edit, update, del, logout }
+const addproduct =async(req,res)=>{
+    try {
+        const {name,price,description,brand}=req.body;
+        const product = new productModel({
+            name,
+            price,
+            description,
+            brand,
+        });
+        await product.save()
+        req.session.message = {
+            type: "success",
+            message: "product added succesfully"
+        }
+        res.redirect("/showproducts")
+    }
+    catch (err) {
+        res.json({ message: err.message, type: "danger" })
+    }
+}
+
+const showproduct =async(req,res)=>{
+    try {
+        const products = await productModel.find();
+        res.render("show_products", { title: "products page", products: products })
+    }
+    catch (err) {
+        res.json({ message: err.message });
+    }
+}
+
+const editproduct = async(req,res)=>{
+    try {
+        const products = await productModel.findById(req.params.id);
+        res.render("edit_product", { title: "Edit product", products:products })
+    }
+    catch (err) {
+        res.status(500).send("product not found")
+    }
+}
+
+const updateproduct = async(req,res)=>{
+    let id = req.params.id
+    try {
+        await productModel.findByIdAndUpdate(id, {
+            name: req.body.name,
+            price: req.body.price,
+            description: req.body.description,
+            brand: req.body.brand
+        })
+        req.session.message = {
+            type: "success",
+            message: "Product Updated successfully"
+        }
+        res.redirect("/showproducts")
+    }
+    catch (err) {
+        res.json({ message: err.message, type: "danger" })
+    }
+}
+
+const delproduct = async(req,res)=>{
+    let id = req.params.id;
+    try {
+        await productModel.findByIdAndDelete(id)
+        req.session.message = {
+            type: "success",
+            message: "Product deleted successfully"
+        }
+        res.status(200).json({ message: "Product deleted succesfully", success: true })
+    }
+    catch (err) {
+        res.json({ message: err.message, type: "danger" })
+    } 
+}
+
+
+export { login, log, adm, add, ad, edit, update, del, logout,showproduct,addproduct,addprod,updateproduct,delproduct,editproduct}

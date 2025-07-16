@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include("partials/head.ejs") %>
+
+    <body class="bg-gray-700">
+        <%- include("partials/nav.ejs") %>
+            <div class="w-5/6 m-auto h-10">
+                <% if (message) { %>
+                    <div class="flex items-center justify-between p-4 mb-4 rounded-lg shadow text-white
+              <%= message.type == 'success' ? 'bg-green-500' : 
+                  message.type == 'danger'? 'bg-red-500' :'bg-blue-500' %>">
+                        <strong>
+                            <%= message.message %>
+                        </strong>
+                        <button class="text-white hover:text-gray-200 text-xl font-bold leading-none"
+                            onclick="this.parentElement.remove()" aria-label="Close">
+                            &times;
+                        </button>
+                    </div>
+                    <% } %>
+            </div>
+            <% if(products?.length > 0 ) { %>
+                <table class="w-5/6 m-auto border-collapse border border-gray-900">
+                    <thead>
+                        <tr class="bg-gray-900 text-white">
+                            <th class="py-2 px-4 text-left">ID</th>
+                            <th class="py-2 px-4 text-left">Product name</th>
+                            <th class="py-2 px-4 text-left">Price</th>
+                            <th class="py-2 px-4 text-left">Description</th>
+                            <th class="py-2 px-4 text-left">Brand</th>
+                            <th class="py-2 px-4 text-left">Options</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% products.forEach((row,index)=>{ %>
+                            <tr class="bg-white border-b border-blue-500 hover:bg-gray-200 transition-all">
+                                <td class="py-2 px-4"><%= index %></td>
+                                <td class="py-2 px-4"><%= row.name %></td>
+                                <td class="py-2 px-4"><%= row.price %></td>
+                                <td class="py-2 px-4"><%= row.description %></td>
+                                <td class="py-2 px-4"><%= row.brand %></td>
+                                <td class="py-2 px-4 flex items-center my-4 gap-4"><a href="/editproduct/<%= row._id %>"><img src="/edit.png"
+                                            alt=""></a><p><img src="/delete.png" alt="" onclick="deleteproduct('<%= row._id%>')"></p></td>
+                            </tr>
+                            <% }) %>
+                    </tbody>
+                </table>
+                <% } else { %>
+                    <h1 class="text-center mt-5 text-5xl text-white">No Products found in the database!..</h1>
+                    <% } %>
+                        <%- include("partials/footer.ejs") %>
+    </body>
+    <script>
+        const deleteproduct=async(id)=>{
+            
+            const response =await fetch(`/deleteproduct/${id}`,
+                {
+                    method:"DELETE"
+                }
+            )
+            
+            const js=await response.json()
+            if(js.success==true)
+            {
+                alert("Product deleted")
+                window.location.reload()
+            }
+        }
+    </script>
+</html>
