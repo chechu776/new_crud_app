@@ -53,8 +53,10 @@
     </body>
     <script>
         const deleteuser=async(id)=>{
-            
-            const response =await fetch(`/delete/${id}`,
+            const conf=confirm("Are You Sure Want to Delete This user")
+            if(conf)
+        {
+             const response =await fetch(`/delete/${id}`,
                 {
                     method:"DELETE"
                 }
@@ -66,6 +68,11 @@
                 alert("User deleted")
                 window.location.reload()
             }
+        }
+           else
+           {
+            alert("User not deleted")
+           }
         }
     </script>
 </html>

@@ -18,16 +18,32 @@ const login = async (req, res) => {
     try {
         const user = await userModel.findOne({ email })
         if (!user) {
-            return res.status(404).send("Email not found")
+            req.session.message = {
+            type: "danger",
+            message: "email not found"
+        }
+        res.redirect("/login")
         }
         if (!user.role) {
-            return res.status(404).send("Access Denied: Not an Admin")
+            req.session.message = {
+            type: "danger",
+            message: "access denied login for admin only"
+        }
+        res.redirect("/login")
         }
         const match = await bcrypt.compare(password, user.password);
         if (!match) {
-            return res.status(401).send("Incorrect password");
+            req.session.message = {
+            type: "danger",
+            message: "Incorrect password"
+            }
+            res.redirect("/login")
         }
         req.session.user = user;
+        req.session.message = {
+            type: "success",
+            message: "Welcome"
+            }
         res.redirect("/admin-dashboard")
     }
     catch (err) {
