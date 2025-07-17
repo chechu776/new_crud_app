@@ -1,6 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import session from "express-session";
+import mongoStore from "connect-mongo";
 
 import router from "./router/admin_route.js"
 
@@ -10,7 +11,8 @@ app.use(express.json());
 app.use(session({
     secret: 'heheh',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    store:mongoStore.create({mongoUrl:"mongodb://127.0.0.1:27017/newcrudDb"})
 }))
 app.use((req,res,next)=>{
     res.locals.message=req.session.message
