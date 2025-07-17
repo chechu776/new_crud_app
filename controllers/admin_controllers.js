@@ -14,37 +14,53 @@ const log = async (req, res) => {
 
 const login = async (req, res) => {
     const { email, password } = req.body;
-    console.log(req.body);
     try {
         const user = await userModel.findOne({ email })
         if (!user) {
             req.session.message = {
-            type: "danger",
-            message: "email not found"
-        }
-        res.redirect("/login")
-        }
-        if (!user.role) {
-            req.session.message = {
-            type: "danger",
-            message: "access denied login for admin only"
-        }
-        res.redirect("/login")
+                type: "danger",
+                message: "email not found"
+            }
+            res.redirect("/login")
         }
         const match = await bcrypt.compare(password, user.password);
         if (!match) {
             req.session.message = {
-            type: "danger",
-            message: "Incorrect password"
+                type: "danger",
+                message: "Incorrect password"
             }
             res.redirect("/login")
         }
         req.session.user = user;
-        req.session.message = {
-            type: "success",
-            message: "Welcome"
+        if (user.role == true) {
+            req.session.message = {
+                type: "success",
+                message: "Welcome Admin"
             }
-        res.redirect("/admin-dashboard")
+            return res.redirect("/admin-dashboard")
+        }
+        else if (user.role == false) {
+            if (user.status == "inactive") {
+                req.session.message = {
+                    type: "danger",
+                    message: "You account has not been activated yet"
+                }
+                return res.redirect("/login")
+            }
+            else {
+                req.session.message = {
+                    type: "success",
+                    message: "welcome user"
+                }
+                return res.redirect("/user_home")
+            }
+
+        }
+        req.session.message = {
+            type: "danger",
+            message: "access denied login for admin only"
+        }
+        res.redirect("/login")
     }
     catch (err) {
         console.log(err);
@@ -65,10 +81,10 @@ const adm = async (req, res) => {
 
 const add = async (req, res) => {
     try {
-        const {name,phone,email,password}=req.body;
+        const { name, phone, email, password } = req.body;
         const salt = 10
-        const hashedPassword=await bcrypt.hash(password, salt)
-        
+        const hashedPassword = await bcrypt.hash(password, salt)
+
         const user = new userModel({
             name,
             phone,
@@ -145,7 +161,7 @@ const logout = (req, res) => {
     });
 };
 
-const addprod = async(req,res)=>{
+const addprod = async (req, res) => {
     try {
         const products = await productModel.find();
         res.render("add_products", { title: "Add Products", products: products })
@@ -155,9 +171,9 @@ const addprod = async(req,res)=>{
     }
 }
 
-const addproduct =async(req,res)=>{
+const addproduct = async (req, res) => {
     try {
-        const {name,price,description,brand}=req.body;
+        const { name, price, description, brand } = req.body;
         const product = new productModel({
             name,
             price,
@@ -176,7 +192,7 @@ const addproduct =async(req,res)=>{
     }
 }
 
-const showproduct =async(req,res)=>{
+const showproduct = async (req, res) => {
     try {
         const products = await productModel.find();
         res.render("show_products", { title: "products page", products: products })
@@ -186,17 +202,17 @@ const showproduct =async(req,res)=>{
     }
 }
 
-const editproduct = async(req,res)=>{
+const editproduct = async (req, res) => {
     try {
         const products = await productModel.findById(req.params.id);
-        res.render("edit_product", { title: "Edit product", products:products })
+        res.render("edit_product", { title: "Edit product", products: products })
     }
     catch (err) {
         res.status(500).send("product not found")
     }
 }
 
-const updateproduct = async(req,res)=>{
+const updateproduct = async (req, res) => {
     let id = req.params.id
     try {
         await productModel.findByIdAndUpdate(id, {
@@ -216,7 +232,7 @@ const updateproduct = async(req,res)=>{
     }
 }
 
-const delproduct = async(req,res)=>{
+const delproduct = async (req, res) => {
     let id = req.params.id;
     try {
         await productModel.findByIdAndDelete(id)
@@ -228,8 +244,31 @@ const delproduct = async(req,res)=>{
     }
     catch (err) {
         res.json({ message: err.message, type: "danger" })
-    } 
+    }
 }
 
+const status = async (req, res) => {
+    let id = req.params.id;
+    try {
+        await userModel.findByIdAndUpdate(id, {
+            status: req.body.status
+        })
+        res.json({ success: true })
+    }
+    catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+}
 
-export { login, log, adm, add, ad, edit, update, del, logout,showproduct,addproduct,addprod,updateproduct,delproduct,editproduct}
+const userhome = async (req, res) => {
+    try {
+        const products = await productModel.find();
+        res.render("userhome", { title: "home page", products: products })
+    }
+    catch (err) {
+        console.log(err);
+        res.send(err)
+    }
+}
+
+export { userhome, login, log, adm, add, ad, edit, update, del, logout, showproduct, addproduct, addprod, updateproduct, delproduct, editproduct, status }

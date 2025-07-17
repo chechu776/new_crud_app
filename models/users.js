@@ -21,6 +21,11 @@ const userschema = new schema({
     role:{
         type:Boolean,
         default:false,
+    },
+    status:{
+        type:String,
+        enum:['active','inactive'],
+        default:'inactive'
     }
 })
 

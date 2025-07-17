@@ -19,7 +19,7 @@
                     </div>
                     <% } %>
             </div>
-            <% if(users?.length > 0 ) { %>
+            <% if(users?.length> 0 ) { %>
                 <table class="w-5/6 m-auto border-collapse border border-gray-900">
                     <thead>
                         <tr class="bg-gray-900 text-white">
@@ -27,22 +27,39 @@
                             <th class="py-2 px-4 text-left">Name</th>
                             <th class="py-2 px-4 text-left">Email</th>
                             <th class="py-2 px-4 text-left">Phone</th>
+                            <th class="py-2 px-4 text-left">Status</th>
                             <th class="py-2 px-4 text-left">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         <% users.forEach((row,index)=>{ %>
                             <%if(row.role==false){ %>
-                            <tr class="bg-white border-b border-blue-500 hover:bg-gray-200 transition-all">
-                                <td class="py-2 px-4"><%= index %></td>
-                                <td class="py-2 px-4"><%= row.name %></td>
-                                <td class="py-2 px-4"><%= row.email %></td>
-                                <td class="py-2 px-4"><%= row.phone %></td>
-                                <td class="py-2 px-4 flex items-center my-4 gap-4"><a href="/edit/<%= row._id %>"><img src="/edit.png"
-                                            alt=""></a><p><img src="/delete.png" alt="" onclick="deleteuser('<%= row._id%>')"></p></td>
-                            </tr>
-                            <% } %>
-                            <% }) %>
+                                <tr class="bg-white border-b border-blue-500 hover:bg-gray-200 transition-all">
+                                    <td class="py-2 px-4">
+                                        <%= index %>
+                                    </td>
+                                    <td class="py-2 px-4">
+                                        <%= row.name %>
+                                    </td>
+                                    <td class="py-2 px-4">
+                                        <%= row.email %>
+                                    </td>
+                                    <td class="py-2 px-4">
+                                        <%= row.phone %>
+                                    </td>
+                                    <td class="py-2 px-4"><a href="/active/<%= row._id %>"
+                                            class="p-2 text-white rounded-lg <%= row.status=='active'?'bg-green-500':'bg-red-500' %>"
+                                            onclick="status('<%= row._id%>','<%= row.status%>')">
+                                            <%= row.status=='active' ?'Active':'Inactive' %>
+                                        </a>
+                                    </td>
+                                    <td class="py-2 px-4 flex items-center my-4 gap-4"><a
+                                            href="/edit/<%= row._id %>"><img src="/edit.png" alt=""></a>
+                                        <p><img src="/delete.png" alt="" onclick="deleteuser('<%= row._id%>')"></p>
+                                    </td>
+                                </tr>
+                                <% } %>
+                                    <% }) %>
                     </tbody>
                 </table>
                 <% } else { %>
@@ -52,27 +69,43 @@
 
     </body>
     <script>
-        const deleteuser=async(id)=>{
-            const conf=confirm("Are You Sure Want to Delete This user")
-            if(conf)
-        {
-             const response =await fetch(`/delete/${id}`,
-                {
-                    method:"DELETE"
+        const deleteuser = async (id) => {
+            const conf = confirm("Are You Sure Want to Delete This user")
+            if (conf) {
+                const response = await fetch(`/delete/${id}`,
+                    {
+                        method: "DELETE"
+                    }
+                )
+
+                const js = await response.json()
+                if (js.success == true) {
+                    alert("User deleted")
+                    window.location.reload()
                 }
-            )
-            
-            const js=await response.json()
-            if(js.success==true)
-            {
-                alert("User deleted")
-                window.location.reload()
+            }
+            else {
+                alert("User not deleted")
             }
         }
-           else
-           {
-            alert("User not deleted")
-           }
+        const status = async (id, status) => {
+            const newStatus = status == 'active' ? 'inactive' : 'active';
+            const response = await fetch(`/status/${id}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ status: newStatus })
+            })
+            const data = await response.json()
+            if (data.success == true) {
+                alert("Status Updated")
+                window.location.reload()
+            }
+            else {
+                alert("Status not updated")
+            }
         }
     </script>
+
 </html>

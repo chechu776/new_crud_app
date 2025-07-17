@@ -24,7 +24,6 @@ app.set("view engine", "ejs")
 const Dburl = "mongodb://127.0.0.1:27017/newcrudDb"
 
 mongoose.connect(Dburl).then(() => {
-    console.log("db connected");
     app.listen(4000)
 })
 

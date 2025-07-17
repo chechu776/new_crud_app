@@ -1,5 +1,5 @@
 import express from "express"
-import { login, log, adm, add, ad, edit, update, del, logout,addproduct,showproduct,addprod,editproduct,updateproduct,delproduct } from "../controllers/admin_controllers.js";
+import { login, log, adm, add, ad, edit, update, del, logout,addproduct,showproduct,addprod,editproduct,updateproduct,delproduct,status,userhome } from "../controllers/admin_controllers.js";
 const router = express.Router();
 
 router.get("/login", log)
@@ -25,5 +25,6 @@ router.get("/showproducts",showproduct)
 router.get("/editproduct/:id", editproduct)
 router.post("/updateproduct/:id", updateproduct)
 router.delete("/deleteproduct/:id", delproduct)
-
+router.patch("/status/:id",status)
+router.get("/user_home",userhome)
 export default router;
