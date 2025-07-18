@@ -17,7 +17,7 @@ const productschema = new schema({
     brand:{
         type:String,
         required:true,
-    }
+    },
 })
 
 const productModel=mongoose.model("products",productschema)

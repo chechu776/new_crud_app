@@ -173,7 +173,7 @@ const addprod = async (req, res) => {
 
 const addproduct = async (req, res) => {
     try {
-        const { name, price, description, brand } = req.body;
+        const { name, price, description, brand} = req.body;
         const product = new productModel({
             name,
             price,
